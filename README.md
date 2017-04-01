@@ -13,3 +13,10 @@ Resources
   * [Report issues](https://github.com/symfony/symfony/issues) and
     [send Pull Requests](https://github.com/symfony/symfony/pulls)
     in the [main Symfony repository](https://github.com/symfony/symfony)
+
+Features in this Fork
+---------------------
+
+- You can pass a callback for the **$names** argument in the **compile()** method.
+- You can add custom node compiler functions that change the way nodes are  compiled using the **addNodeFunction()** method.
+- You can customize the regular expression for variables in the lexer using the **setNamePattern()** method.
