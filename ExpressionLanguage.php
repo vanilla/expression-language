@@ -152,6 +152,15 @@ class ExpressionLanguage
         $this->addFunction(ExpressionFunction::fromPhp('constant'));
     }
 
+    /**
+     * Set the regular expression that will be used to evaluate variable names.
+     *
+     * @param string $pattern A valid regular expression with delimiters.
+     */
+    public function setNamePattern($pattern) {
+        $this->getLexer()->setNamePattern($pattern);
+    }
+
     private function getLexer()
     {
         if (null === $this->lexer) {
