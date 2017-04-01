@@ -95,11 +95,21 @@ class ExpressionLanguage
             return $expression;
         }
 
-        asort($names);
-        $cacheKeyItems = array();
+        if (is_callable($names)) {
+            if (is_object($names)) {
+                $cacheKeyItems = [spl_object_hash($names)];
+            } elseif (is_string($names) || is_string($names[0])) {
+                $cacheKeyItems = (array)$names;
+            } else {
+                $cacheKeyItems = [spl_object_hash($names[0]), $names[1]];
+            }
+        } else {
+            asort($names);
+            $cacheKeyItems = array();
 
-        foreach ($names as $nameKey => $name) {
-            $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            foreach ($names as $nameKey => $name) {
+                $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            }
         }
 
         $cacheItem = $this->cache->getItem(rawurlencode($expression.'//'.implode('|', $cacheKeyItems)));

@@ -199,6 +199,14 @@ class Parser
                             }
 
                             $node = new Node\FunctionNode($token->value, $this->parseArguments());
+                        } elseif (is_callable($this->names)) {
+                            // Use a custom function to figure out the name.
+                            $name = call_user_func($this->names, $token->value);
+                            if (empty($name)) {
+                                throw new SyntaxError(sprintf('Variable "%s" is not valid', $token->value), $token->cursor);
+                            }
+
+                            $node = new Node\NameNode($name);
                         } else {
                             if (!in_array($token->value, $this->names, true)) {
                                 throw new SyntaxError(sprintf('Variable "%s" is not valid', $token->value), $token->cursor);
