@@ -145,6 +145,25 @@ class ExpressionLanguage
         $this->functions[$name] = array('compiler' => $compiler, 'evaluator' => $evaluator);
     }
 
+    /**
+     * Register a custom compiler for a node type.
+     *
+     * @param string $nodeClass The name of the node class.
+     * @param callable $compiler The compiler function.
+     */
+    public function registerNodeFunction($nodeClass, callable $compiler) {
+        if (null !== $this->parser) {
+            throw new \LogicException('Registering functions after calling evaluate(), compile() or parse() is not supported.');
+        }
+
+        // Strip off a namespace.
+        if (false !== $pos = strripos($nodeClass, '\\')) {
+            $nodeClass = substr($nodeClass, $pos + 1);
+        }
+
+        $this->functions['.'.$nodeClass] = ['compiler' => $compiler];
+    }
+
     public function addFunction(ExpressionFunction $function)
     {
         $this->register($function->getName(), $function->getCompiler(), $function->getEvaluator());

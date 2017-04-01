@@ -30,8 +30,8 @@ class CompilerOverrideTest extends TestCase {
      */
     public function testObjectToArrayAccess() {
         $expr = new ExpressionLanguage();
-        $expr->register(
-            '.GetAttrNode',
+        $expr->registerNodeFunction(
+            GetAttrNode::class,
             function (Compiler $compiler, GetAttrNode $node) {
                 switch ($node->attributes['type']) {
                     case GetAttrNode::METHOD_CALL:
@@ -54,9 +54,6 @@ class CompilerOverrideTest extends TestCase {
                         ;
                         break;
                 }
-            },
-            function ($name) {
-                return $name;
             });
 
         $php = $expr->compile('a.b.c', ['a']);
