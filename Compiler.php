@@ -57,7 +57,13 @@ class Compiler
      */
     public function compile(Node\Node $node)
     {
-        $node->compile($this);
+        // Look for a visitor.
+        $key = '.'.ltrim(strrchr(get_class($node), '\\'), '\\');
+        if (isset($this->functions[$key]['compiler'])) {
+            call_user_func($this->functions[$key]['compiler'], $this, $node);
+        } else {
+            $node->compile($this);
+        }
 
         return $this;
     }

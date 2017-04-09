@@ -95,11 +95,21 @@ class ExpressionLanguage
             return $expression;
         }
 
-        asort($names);
-        $cacheKeyItems = array();
+        if (is_callable($names)) {
+            if (is_object($names)) {
+                $cacheKeyItems = [spl_object_hash($names)];
+            } elseif (is_string($names) || is_string($names[0])) {
+                $cacheKeyItems = (array)$names;
+            } else {
+                $cacheKeyItems = [spl_object_hash($names[0]), $names[1]];
+            }
+        } else {
+            asort($names);
+            $cacheKeyItems = array();
 
-        foreach ($names as $nameKey => $name) {
-            $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            foreach ($names as $nameKey => $name) {
+                $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            }
         }
 
         $cacheItem = $this->cache->getItem(rawurlencode($expression.'//'.implode('|', $cacheKeyItems)));
@@ -135,6 +145,25 @@ class ExpressionLanguage
         $this->functions[$name] = array('compiler' => $compiler, 'evaluator' => $evaluator);
     }
 
+    /**
+     * Register a custom compiler for a node type.
+     *
+     * @param string $nodeClass The name of the node class.
+     * @param callable $compiler The compiler function.
+     */
+    public function registerNodeFunction($nodeClass, callable $compiler) {
+        if (null !== $this->parser) {
+            throw new \LogicException('Registering functions after calling evaluate(), compile() or parse() is not supported.');
+        }
+
+        // Strip off a namespace.
+        if (false !== $pos = strripos($nodeClass, '\\')) {
+            $nodeClass = substr($nodeClass, $pos + 1);
+        }
+
+        $this->functions['.'.$nodeClass] = ['compiler' => $compiler];
+    }
+
     public function addFunction(ExpressionFunction $function)
     {
         $this->register($function->getName(), $function->getCompiler(), $function->getEvaluator());
@@ -150,6 +179,15 @@ class ExpressionLanguage
     protected function registerFunctions()
     {
         $this->addFunction(ExpressionFunction::fromPhp('constant'));
+    }
+
+    /**
+     * Set the regular expression that will be used to evaluate variable names.
+     *
+     * @param string $pattern A valid regular expression with delimiters.
+     */
+    public function setNamePattern($pattern) {
+        $this->getLexer()->setNamePattern($pattern);
     }
 
     private function getLexer()
