@@ -55,9 +55,17 @@ class CompilerOverrideTest extends TestCase {
                         break;
                 }
             });
+        $expr->register('count', function ($expr) {
+            return "count($expr)";
+        }, function ($expr) {
+            return count($expr);
+        });
 
         $php = $expr->compile('a.b.c', ['a']);
-        $this->assertSame('$a["b"]["c"]', $php);
+        $this->assertEquals('$a["b"]["c"]', $php);
+
+        $php2 = $expr->compile('count(a.b)', ['a']);
+        $this->assertEquals('count($a["b"])', $php2);
     }
 
     public function testNamePattern() {

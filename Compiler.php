@@ -57,13 +57,7 @@ class Compiler
      */
     public function compile(Node\Node $node)
     {
-        // Look for a visitor.
-        $key = '.'.ltrim(strrchr(get_class($node), '\\'), '\\');
-        if (isset($this->functions[$key]['compiler'])) {
-            call_user_func($this->functions[$key]['compiler'], $this, $node);
-        } else {
-            $node->compile($this);
-        }
+        $this->compileNode($node);
 
         return $this;
     }
@@ -73,7 +67,7 @@ class Compiler
         $current = $this->source;
         $this->source = '';
 
-        $node->compile($this);
+        $this->compileNode($node);
 
         $source = $this->source;
         $this->source = $current;
@@ -150,5 +144,18 @@ class Compiler
         }
 
         return $this;
+    }
+
+    /**
+     * @param Node\Node $node
+     */
+    private function compileNode(Node\Node $node) {
+        // Look for a visitor.
+        $key = '.'.ltrim(strrchr(get_class($node), '\\'), '\\');
+        if (isset($this->functions[$key]['compiler'])) {
+            call_user_func($this->functions[$key]['compiler'], $this, $node);
+        } else {
+            $node->compile($this);
+        }
     }
 }
